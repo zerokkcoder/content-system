@@ -10,8 +10,9 @@ const (
 )
 
 func CmsRouters(r *gin.Engine) {
-	root := r.Group(rootPath)
 	cmsApp := services.NewCmdApp()
+	session := &SessionAuth{}
+	root := r.Group(rootPath).Use(session.Auth)
 	{
 		// /api/cms/ping
 		root.GET("/cms/ping", cmsApp.Ping)
