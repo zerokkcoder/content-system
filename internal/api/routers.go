@@ -6,7 +6,8 @@ import (
 )
 
 const (
-	rootPath = "/api"
+	rootPath   = "/api"
+	noAuthPath = "/out/api"
 )
 
 func CmsRouters(r *gin.Engine) {
@@ -16,5 +17,11 @@ func CmsRouters(r *gin.Engine) {
 	{
 		// /api/cms/ping
 		root.GET("/cms/ping", cmsApp.Ping)
+	}
+
+	noAuth := r.Group(noAuthPath)
+	{
+		// /out/api/cms/register
+		noAuth.POST("/cms/register", cmsApp.Register)
 	}
 }
