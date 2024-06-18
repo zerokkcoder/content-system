@@ -40,13 +40,13 @@ func (ca *CmsApp) Register(c *gin.Context) {
 	accountDao := dao.NewAccountDao(ca.db)
 	isExist, err := accountDao.IsExist(req.Username)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
 	if isExist {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "账号已存在",
 		})
 		return
@@ -60,7 +60,7 @@ func (ca *CmsApp) Register(c *gin.Context) {
 		CreatedAt: nowTime,
 		UpdatedAt: nowTime,
 	}); err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
 		return

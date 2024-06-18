@@ -23,5 +23,7 @@ func CmsRouters(r *gin.Engine) {
 	{
 		// /out/api/cms/register
 		noAuth.POST("/cms/register", cmsApp.Register)
+		// /out/api/cms/login
+		noAuth.POST("/cms/login", cmsApp.Login)
 	}
 }
