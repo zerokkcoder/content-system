@@ -12,7 +12,7 @@ const (
 
 func CmsRouters(r *gin.Engine) {
 	cmsApp := services.NewCmsApp()
-	session := &SessionAuth{}
+	session := NewSessionAuth()
 	root := r.Group(rootPath).Use(session.Auth)
 	{
 		// /api/cms/ping

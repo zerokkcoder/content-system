@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/zerokkcoder/content-system/internal/dao"
+	"github.com/zerokkcoder/content-system/internal/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -71,7 +72,7 @@ func (ca *CmsApp) genetateSessionID(ctx context.Context, username string) (strin
 	// session id 生成
 	sessionID := uuid.New().String()
 	// key: session_id:{username} val: session_id 20s
-	sessionKey := fmt.Sprintf("session_id:%s", username)
+	sessionKey := utils.GetSessionKey(username)
 	// session id 持久化
 	err := ca.rdb.Set(ctx, sessionKey, sessionID, time.Hour*8).Err()
 	if err != nil {
@@ -79,7 +80,7 @@ func (ca *CmsApp) genetateSessionID(ctx context.Context, username string) (strin
 		return "", err
 	}
 	// session id 过期时间 持久化
-	authKey := fmt.Sprintf("session_auth:%s", sessionID)
+	authKey := utils.GetAuthKey(sessionID)
 	err = ca.rdb.Set(ctx, authKey, time.Now().Unix(), time.Hour*8).Err()
 	if err != nil {
 		fmt.Printf("set redis auth error = %v\n", err)
