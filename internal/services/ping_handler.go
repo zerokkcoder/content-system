@@ -15,7 +15,7 @@ type PingRsp struct {
 	Message string `json:"message"`
 }
 
-func (ca *CmdApp) Ping(c *gin.Context) {
+func (ca *CmsApp) Ping(c *gin.Context) {
 	var req PingReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{

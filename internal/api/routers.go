@@ -11,7 +11,7 @@ const (
 )
 
 func CmsRouters(r *gin.Engine) {
-	cmsApp := services.NewCmdApp()
+	cmsApp := services.NewCmsApp()
 	session := &SessionAuth{}
 	root := r.Group(rootPath).Use(session.Auth)
 	{
