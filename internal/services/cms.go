@@ -4,13 +4,17 @@ import (
 	"context"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/zerokkcoder/content-system/internal/process"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+
+	goflow "github.com/s8sg/goflow/v1"
 )
 
 type CmsApp struct {
-	db  *gorm.DB
-	rdb *redis.Client
+	db          *gorm.DB
+	rdb         *redis.Client
+	flowService *goflow.FlowService
 }
 
 func NewCmsApp() *CmsApp {
@@ -19,6 +23,10 @@ func NewCmsApp() *CmsApp {
 	app.connDB()
 	// 连接redis
 	app.connRdb()
+	app.flowService = flowService()
+	go func() {
+		process.ExecContentFlow(app.db)
+	}()
 	return app
 }
 
@@ -39,6 +47,13 @@ func (app *CmsApp) connDB() {
 	mysqlDB = mysqlDB.Debug()
 
 	app.db = mysqlDB
+}
+
+func flowService() *goflow.FlowService {
+	fs := &goflow.FlowService{
+		RedisURL: "localhost:6379",
+	}
+	return fs
 }
 
 func (app *CmsApp) connRdb() {

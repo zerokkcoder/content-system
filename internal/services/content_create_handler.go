@@ -1,12 +1,15 @@
 package services
 
 import (
+	"encoding/json"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/zerokkcoder/content-system/internal/dao"
 	"github.com/zerokkcoder/content-system/internal/model"
+
+	goflow "github.com/s8sg/goflow/v1"
 )
 
 type ContentCreateReq struct {
@@ -39,7 +42,7 @@ func (ca *CmsApp) ContentCreate(c *gin.Context) {
 		return
 	}
 	contentDao := dao.NewContentDao(ca.db)
-	if err := contentDao.Create(&model.ContentDetail{
+	id, err := contentDao.Create(&model.ContentDetail{
 		Title:          req.Title,
 		Description:    req.Description,
 		Author:         req.Author,
@@ -52,8 +55,22 @@ func (ca *CmsApp) ContentCreate(c *gin.Context) {
 		Format:         req.Format,
 		Quality:        req.Quality,
 		ApprovalStatus: req.ApprovalStatus,
-	}); err != nil {
+	})
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	// 工作流
+	flowData := map[string]interface{}{
+		"content_id": id,
+	}
+	data, _ := json.Marshal(flowData)
+	if err := ca.flowService.Execute("content-flow", &goflow.Request{
+		Body: data,
+	}); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
 		return

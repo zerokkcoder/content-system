@@ -13,5 +13,3 @@
 [GIN-debug] POST   /flow/:flowName/request/resume:requestId --> github.com/s8sg/goflow/runtime.Router.resumeRequestHandler.func7 (3 handlers)
 [GIN-debug] POST   /flow/:flowName/request/state:requestId --> github.com/s8sg/goflow/runtime.Router.requestStateHandler.func8 (3 handlers)
 [GIN-debug] POST   /flow/:flowName/request/list --> github.com/s8sg/goflow/runtime.Router.requestListHandler.func9 (3 handlers)
-[GIN] 2024/06/18 - 18:09:03 | 200 |      1.7361ms |             ::1 | GET      "/flow/add-flow"
-[GIN] 2024/06/18 - 18:09:54 | 200 |       1.597ms |             ::1 | GET      "/flow/add-flow"

@@ -2,6 +2,7 @@ package dao
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/zerokkcoder/content-system/internal/model"
 	"gorm.io/gorm"
@@ -15,12 +16,21 @@ func NewContentDao(db *gorm.DB) *ContentDao {
 	return &ContentDao{db: db}
 }
 
-func (c *ContentDao) Create(detail *model.ContentDetail) error {
+func (c *ContentDao) First(contentID int64) (*model.ContentDetail, error) {
+	var detail model.ContentDetail
+	if err := c.db.Where("id = ?", contentID).First(&detail).Error; err != nil {
+		fmt.Printf("ContentDao First error = %v\n", err)
+		return nil, err
+	}
+	return &detail, nil
+}
+
+func (c *ContentDao) Create(detail *model.ContentDetail) (int64, error) {
 	if err := c.db.Create(detail).Error; err != nil {
 		fmt.Printf("ContentDao Create error = %v\n", err)
-		return err
+		return 0, err
 	}
-	return nil
+	return detail.ID, nil
 }
 
 func (c *ContentDao) Update(detail *model.ContentDetail) error {
@@ -96,4 +106,14 @@ func (c *ContentDao) Find(params *FindParams) ([]*model.ContentDetail, int64, er
 	}
 
 	return data, total, nil
+}
+
+func (c *ContentDao) UpdateByID(id int64, column string, value interface{}) error {
+	if err := c.db.Model(&model.ContentDetail{}).
+		Where("id = ?", id).
+		Update(column, value).Error; err != nil {
+		log.Printf("ContentDao UpdateByID error = %v\n", err)
+		return err
+	}
+	return nil
 }
