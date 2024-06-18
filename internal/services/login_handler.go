@@ -1,9 +1,13 @@
 package services
 
 import (
+	"context"
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/zerokkcoder/content-system/internal/dao"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -44,22 +48,44 @@ func (ca *CmsApp) Login(c *gin.Context) {
 	}
 	// 登录成功
 	// 生成session
+	sessionID, err := ca.genetateSessionID(context.Background(), account.Username)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "系统错误，请稍后重试",
+		})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"code": 0,
 		"msg":  "ok",
 		"data": LoginRsp{
-			SessionID: genetateSessionID(),
+			SessionID: sessionID,
 			Username:  account.Username,
 			Nickname:  account.Nickname,
 		},
 	})
 }
 
-func genetateSessionID() string {
+func (ca *CmsApp) genetateSessionID(ctx context.Context, username string) (string, error) {
 	// session id 生成
-
+	sessionID := uuid.New().String()
+	// key: session_id:{username} val: session_id 20s
+	sessionKey := fmt.Sprintf("session_id:%s", username)
 	// session id 持久化
-
-	return "session-id"
+	err := ca.rdb.Set(ctx, sessionKey, sessionID, time.Hour*8).Err()
+	if err != nil {
+		fmt.Printf("set redis session error = %v\n", err)
+		return "", err
+	}
+	// session id 过期时间 持久化
+	authKey := fmt.Sprintf("session_auth:%s", sessionID)
+	err = ca.rdb.Set(ctx, authKey, time.Now().Unix(), time.Hour*8).Err()
+	if err != nil {
+		fmt.Printf("set redis auth error = %v\n", err)
+		return "", err
+	}
+	fmt.Println("sessionKey", sessionKey)
+	fmt.Println("authKey", authKey)
+	return sessionID, nil
 }
